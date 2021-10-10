@@ -45,9 +45,6 @@ class ValidationMessageTest extends TestCase
      */
     private $priceHelperMock;
 
-    /**
-     * @inheirtDoc
-     */
     protected function setUp(): void
     {
         $this->scopeConfigMock = $this->getMockForAbstractClass(ScopeConfigInterface::class);
@@ -63,21 +60,19 @@ class ValidationMessageTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testGetMessage(): void
+    public function testGetMessage()
     {
         $minimumAmount = 20;
         $minimumAmountCurrency = '$20';
-
-        $this->scopeConfigMock
+        $this->scopeConfigMock->expects($this->at(0))
             ->method('getValue')
-            ->withConsecutive(
-                ['sales/minimum_order/description', ScopeInterface::SCOPE_STORE],
-                ['sales/minimum_order/amount', ScopeInterface::SCOPE_STORE]
-            )
-            ->willReturnOnConsecutiveCalls(null, $minimumAmount);
+            ->with('sales/minimum_order/description', ScopeInterface::SCOPE_STORE)
+            ->willReturn(null);
+
+        $this->scopeConfigMock->expects($this->at(1))
+            ->method('getValue')
+            ->with('sales/minimum_order/amount', ScopeInterface::SCOPE_STORE)
+            ->willReturn($minimumAmount);
 
         $this->priceHelperMock->expects($this->once())
             ->method('currency')
@@ -86,11 +81,7 @@ class ValidationMessageTest extends TestCase
 
         $this->assertEquals(__('Minimum order amount is %1', $minimumAmountCurrency), $this->model->getMessage());
     }
-
-    /**
-     * @return void
-     */
-    public function testGetConfigMessage(): void
+    public function testGetConfigMessage()
     {
         $configMessage = 'config_message';
         $this->scopeConfigMock->expects($this->once())

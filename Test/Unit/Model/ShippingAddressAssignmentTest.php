@@ -56,9 +56,6 @@ class ShippingAddressAssignmentTest extends TestCase
      */
     private $shippingAssignmentMock;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp(): void
     {
         $this->cartExtensionFactoryMock = $this->createPartialMock(
@@ -95,10 +92,7 @@ class ShippingAddressAssignmentTest extends TestCase
         );
     }
 
-    /**
-    * @return void
-    */
-    public function testSetAddressUseForShippingTrue(): void
+    public function testSetAddressUseForShippingTrue()
     {
         $addressId = 1;
         $addressMock = $this->getMockForAbstractClass(AddressInterface::class);
@@ -110,10 +104,7 @@ class ShippingAddressAssignmentTest extends TestCase
         $this->model->setAddress($this->quoteMock, $this->addressMock, true);
     }
 
-    /**
-    * @return void
-    */
-    public function testSetAddressUseForShippingFalse(): void
+    public function testSetAddressUseForShippingFalse()
     {
         $addressMock = $this->getMockForAbstractClass(AddressInterface::class);
         $this->quoteMock->expects($this->once())->method('getShippingAddress')->willReturn($addressMock);

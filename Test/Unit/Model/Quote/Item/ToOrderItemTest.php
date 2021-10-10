@@ -55,9 +55,6 @@ class ToOrderItemTest extends TestCase
      */
     protected $orderItemMock;
 
-    /**
-     * @inheriDoc
-     */
     protected function setUp(): void
     {
         $this->orderItemFactoryMock = $this->createPartialMock(
@@ -80,10 +77,8 @@ class ToOrderItemTest extends TestCase
 
     /**
      * test for convert method
-     *
-     * @return void
      */
-    public function testConvert(): void
+    public function testConvert()
     {
         $this->quoteItemMock->expects($this->exactly(2))
             ->method('getProduct')
@@ -95,13 +90,14 @@ class ToOrderItemTest extends TestCase
             ->method('getOrderOptions')
             ->with($this->productMock)
             ->willReturn(['option']);
-        $this->objectCopyServiceMock
+        $this->objectCopyServiceMock->expects($this->at(0))
             ->method('getDataFromFieldset')
-            ->withConsecutive(
-                ['quote_convert_item', 'to_order_item', $this->quoteItemMock],
-                ['quote_convert_item', 'to_order_item_discount', $this->quoteItemMock]
-            )
-            ->willReturnOnConsecutiveCalls([], []);
+            ->with('quote_convert_item', 'to_order_item', $this->quoteItemMock)
+            ->willReturn([]);
+        $this->objectCopyServiceMock->expects($this->at(1))
+            ->method('getDataFromFieldset')
+            ->with('quote_convert_item', 'to_order_item_discount', $this->quoteItemMock)
+            ->willReturn([]);
         $this->orderItemFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->orderItemMock);

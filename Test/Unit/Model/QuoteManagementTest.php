@@ -18,12 +18,10 @@ use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
-use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\StateException;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -47,6 +45,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderInterfaceFactory;
 use Magento\Sales\Api\Data\OrderItemInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
+
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\StoreManagerInterface;
@@ -197,8 +196,6 @@ class QuoteManagementTest extends TestCase
     private $quoteIdMaskFactoryMock;
 
     /**
-     * @inheriDoc
-     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function setUp(): void
@@ -275,7 +272,7 @@ class QuoteManagementTest extends TestCase
             )
             ->disableOriginalConstructor()
             ->getMock();
-        $this->customerSessionMock = $this->createMock(CustomerSession::class);
+        $this->customerSessionMock = $this->createMock(\Magento\Customer\Model\Session::class);
         $this->accountManagementMock = $this->getMockForAbstractClass(AccountManagementInterface::class);
 
         $this->quoteFactoryMock = $this->createPartialMock(QuoteFactory::class, ['create']);
@@ -318,10 +315,7 @@ class QuoteManagementTest extends TestCase
         $this->remoteAddressMock = $this->createMock(RemoteAddress::class);
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateEmptyCartAnonymous(): void
+    public function testCreateEmptyCartAnonymous()
     {
         $storeId = 345;
         $quoteId = 2311;
@@ -351,10 +345,7 @@ class QuoteManagementTest extends TestCase
         $this->assertEquals($quoteId, $this->model->createEmptyCart());
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateEmptyCartForCustomer(): void
+    public function testCreateEmptyCartForCustomer()
     {
         $storeId = 345;
         $quoteId = 2311;
@@ -368,8 +359,7 @@ class QuoteManagementTest extends TestCase
             ->with($userId)
             ->willThrowException(new NoSuchEntityException());
         $customer = $this->getMockBuilder(CustomerInterface::class)
-            ->onlyMethods(['getDefaultBilling'])
-            ->disableOriginalConstructor()
+            ->setMethods(['getDefaultBilling'])->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $quoteAddress = $this->createPartialMock(
             Address::class,
@@ -393,10 +383,7 @@ class QuoteManagementTest extends TestCase
         $this->assertEquals($quoteId, $this->model->createEmptyCartForCustomer($userId));
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateEmptyCartForCustomerReturnExistsQuote(): void
+    public function testCreateEmptyCartForCustomerReturnExistsQuote()
     {
         $storeId = 345;
         $userId = 567;
@@ -409,8 +396,7 @@ class QuoteManagementTest extends TestCase
             ->with($userId)->willReturn($quoteMock);
 
         $customer = $this->getMockBuilder(CustomerInterface::class)
-            ->onlyMethods(['getDefaultBilling'])
-            ->disableOriginalConstructor()
+            ->setMethods(['getDefaultBilling'])->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $quoteAddress = $this->createPartialMock(
             Address::class,
@@ -430,12 +416,9 @@ class QuoteManagementTest extends TestCase
         $this->model->createEmptyCartForCustomer($userId);
     }
 
-    /**
-     * @return void
-     */
-    public function testAssignCustomerFromAnotherStore(): void
+    public function testAssignCustomerFromAnotherStore()
     {
-        $this->expectException(StateException::class);
+        $this->expectException('Magento\Framework\Exception\StateException');
         $this->expectExceptionMessage(
             'The customer can\'t be assigned to the cart. The cart belongs to a different store.'
         );
@@ -477,12 +460,9 @@ class QuoteManagementTest extends TestCase
         $this->model->assignCustomer($cartId, $customerId, $storeId);
     }
 
-    /**
-     * @return void
-     */
-    public function testAssignCustomerToNonanonymousCart(): void
+    public function testAssignCustomerToNonanonymousCart()
     {
-        $this->expectException(StateException::class);
+        $this->expectException('Magento\Framework\Exception\StateException');
         $this->expectExceptionMessage('The customer can\'t be assigned to the cart because the cart isn\'t anonymous.');
         $cartId = 220;
         $customerId = 455;
@@ -528,12 +508,9 @@ class QuoteManagementTest extends TestCase
         $this->model->assignCustomer($cartId, $customerId, $storeId);
     }
 
-    /**
-     * @return void
-     */
-    public function testAssignCustomerNoSuchCustomer(): void
+    public function testAssignCustomerNoSuchCustomer()
     {
-        $this->expectException(NoSuchEntityException::class);
+        $this->expectException('Magento\Framework\Exception\NoSuchEntityException');
         $cartId = 220;
         $customerId = 455;
         $storeId = 5;
@@ -563,10 +540,7 @@ class QuoteManagementTest extends TestCase
         $this->model->assignCustomer($cartId, $customerId, $storeId);
     }
 
-    /**
-     * @return void
-     */
-    public function testAssignCustomerWithActiveCart(): void
+    public function testAssignCustomerWithActiveCart()
     {
         $cartId = 220;
         $customerId = 455;
@@ -642,10 +616,7 @@ class QuoteManagementTest extends TestCase
         $this->model->assignCustomer($cartId, $customerId, $storeId);
     }
 
-    /**
-     * @return void
-     */
-    public function testAssignCustomer(): void
+    public function testAssignCustomer()
     {
         $cartId = 220;
         $customerId = 455;
@@ -715,12 +686,7 @@ class QuoteManagementTest extends TestCase
         $this->model->assignCustomer($cartId, $customerId, $storeId);
     }
 
-    /**
-     * @return void
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     */
-    public function testSubmit(): void
+    public function testSubmit()
     {
         $orderData = [];
         $isGuest = true;
@@ -740,9 +706,11 @@ class QuoteManagementTest extends TestCase
         $convertedShipping = $this->createPartialMockForAbstractClass(OrderAddressInterface::class, ['setData']);
         $convertedPayment = $this->getMockForAbstractClass(OrderPaymentInterface::class);
         $convertedQuoteItem = $this->getMockForAbstractClass(OrderItemInterface::class);
+
         $addresses = [$convertedShipping, $convertedBilling];
         $quoteItems = [$quoteItem];
         $convertedItems = [$convertedQuoteItem];
+
         $quote = $this->getQuote(
             $isGuest,
             $isVirtual,
@@ -761,24 +729,26 @@ class QuoteManagementTest extends TestCase
             ->method('convert')
             ->with($shippingAddress, $orderData)
             ->willReturn($baseOrder);
-        $this->quoteAddressToOrderAddress
+        $this->quoteAddressToOrderAddress->expects($this->at(0))
             ->method('convert')
-            ->withConsecutive(
+            ->with(
+                $shippingAddress,
                 [
-                    $shippingAddress,
-                    [
-                        'address_type' => 'shipping',
-                        'email' => 'customer@example.com'
-                    ]
-                ],
-                [
-                    $billingAddress,
-                    [
-                        'address_type' => 'billing',
-                        'email' => 'customer@example.com'
-                    ]
+                    'address_type' => 'shipping',
+                    'email' => 'customer@example.com'
                 ]
-            )->willReturnOnConsecutiveCalls($convertedShipping, $convertedBilling);
+            )
+            ->willReturn($convertedShipping);
+        $this->quoteAddressToOrderAddress->expects($this->at(1))
+            ->method('convert')
+            ->with(
+                $billingAddress,
+                [
+                    'address_type' => 'billing',
+                    'email' => 'customer@example.com'
+                ]
+            )
+            ->willReturn($convertedBilling);
         $billingAddress->expects($this->once())->method('getId')->willReturn(4);
         $convertedBilling->expects($this->once())->method('setData')->with('quote_address_id', 4);
 
@@ -804,26 +774,17 @@ class QuoteManagementTest extends TestCase
             ->method('place')
             ->with($order)
             ->willReturn($order);
-        $this->eventManager
+        $this->eventManager->expects($this->at(0))
             ->method('dispatch')
-            ->withConsecutive(
-                [
-                    'sales_model_service_quote_submit_before',
-                    ['order' => $order, 'quote' => $quote]
-                ],
-                [
-                    'sales_model_service_quote_submit_success',
-                    ['order' => $order, 'quote' => $quote]
-                ]
-            );
+            ->with('sales_model_service_quote_submit_before', ['order' => $order, 'quote' => $quote]);
+        $this->eventManager->expects($this->at(1))
+            ->method('dispatch')
+            ->with('sales_model_service_quote_submit_success', ['order' => $order, 'quote' => $quote]);
         $this->quoteRepositoryMock->expects($this->once())->method('save')->with($quote);
         $this->assertEquals($order, $this->model->submit($quote, $orderData));
     }
 
-    /**
-     * @return void
-     */
-    public function testPlaceOrderIfCustomerIsGuest(): void
+    public function testPlaceOrderIfCustomerIsGuest()
     {
         $cartId = 100;
         $orderId = 332;
@@ -859,11 +820,11 @@ class QuoteManagementTest extends TestCase
 
         /** @var MockObject|QuoteManagement $service */
         $service = $this->getMockBuilder(QuoteManagement::class)
-            ->onlyMethods(['submit'])
+            ->setMethods(['submit'])
             ->setConstructorArgs(
                 [
                     'eventManager' => $this->eventManager,
-                    'submitQuoteValidator' => $this->submitQuoteValidator,
+                    'quoteValidator' => $this->submitQuoteValidator,
                     'orderFactory' => $this->orderFactory,
                     'orderManagement' => $this->orderManagement,
                     'customerManagement' => $this->customerManagement,
@@ -885,7 +846,7 @@ class QuoteManagementTest extends TestCase
                     'quoteIdMaskFactory' => $this->quoteIdMaskFactoryMock,
                     'addressRepository' => $this->addressRepositoryMock,
                     'request' => $this->requestMock,
-                    'remoteAddress' => $this->remoteAddressMock
+                    'remoteAddress' => $this->remoteAddressMock,
                 ]
             )
             ->getMock();
@@ -913,10 +874,9 @@ class QuoteManagementTest extends TestCase
     }
 
     /**
-     * @return void
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function testPlaceOrder(): void
+    public function testPlaceOrder()
     {
         $cartId = 323;
         $orderId = 332;
@@ -927,11 +887,11 @@ class QuoteManagementTest extends TestCase
 
         /** @var MockObject|QuoteManagement $service */
         $service = $this->getMockBuilder(QuoteManagement::class)
-            ->onlyMethods(['submit'])
+            ->setMethods(['submit'])
             ->setConstructorArgs(
                 [
                     'eventManager' => $this->eventManager,
-                    'submitQuoteValidator' => $this->submitQuoteValidator,
+                    'quoteValidator' => $this->submitQuoteValidator,
                     'orderFactory' => $this->orderFactory,
                     'orderManagement' => $this->orderManagement,
                     'customerManagement' => $this->customerManagement,
@@ -953,7 +913,7 @@ class QuoteManagementTest extends TestCase
                     'quoteIdMaskFactory' => $this->quoteIdMaskFactoryMock,
                     'addressRepository' => $this->addressRepositoryMock,
                     'request' => $this->requestMock,
-                    'remoteAddress' => $this->remoteAddressMock
+                    'remoteAddress' => $this->remoteAddressMock,
                 ]
             )
             ->getMock();
@@ -977,6 +937,9 @@ class QuoteManagementTest extends TestCase
         $this->quoteMock->expects($this->once())
             ->method('getCheckoutMethod')
             ->willReturn(Onepage::METHOD_CUSTOMER);
+        $this->quoteMock->expects($this->never())
+            ->method('setCustomerIsGuest')
+            ->with(true);
 
         $this->remoteAddressMock
             ->method('getRemoteAddress')
@@ -1015,27 +978,26 @@ class QuoteManagementTest extends TestCase
     }
 
     /**
-     * @param bool $isGuest
-     * @param bool $isVirtual
+     * @param $isGuest
+     * @param $isVirtual
      * @param Address $billingAddress
      * @param Payment $payment
-     * @param int $customerId
-     * @param int $id
+     * @param $customerId
+     * @param $id
      * @param array $quoteItems
      * @param Address|null $shippingAddress
-     *
      * @return MockObject
      */
     protected function getQuote(
-        bool $isGuest,
-        bool $isVirtual,
+        $isGuest,
+        $isVirtual,
         Address $billingAddress,
         Payment $payment,
-        int $customerId,
-        int $id,
+        $customerId,
+        $id,
         array $quoteItems,
         Address $shippingAddress = null
-    ): MockObject {
+    ) {
         $quote = $this->getMockBuilder(Quote::class)
             ->addMethods(['getCustomerEmail', 'getCustomerId'])
             ->onlyMethods(
@@ -1113,24 +1075,22 @@ class QuoteManagementTest extends TestCase
      * @param OrderInterface $baseOrder
      * @param OrderAddressInterface $billingAddress
      * @param array $addresses
-     * @param OrderPaymentInterface $payment
+     * @param $payment
      * @param array $items
-     * @param int $quoteId
-     * @param OrderAddressInterface|null $shippingAddress
-     * @param int|null $customerId
-     *
+     * @param $quoteId
+     * @param OrderAddressInterface $shippingAddress
      * @return MockObject
      */
     protected function prepareOrderFactory(
         OrderInterface $baseOrder,
         OrderAddressInterface $billingAddress,
         array $addresses,
-        OrderPaymentInterface $payment,
+        $payment,
         array $items,
-        int $quoteId,
+        $quoteId,
         OrderAddressInterface $shippingAddress = null,
-        int $customerId = null
-    ): MockObject {
+        $customerId = null
+    ) {
         $order = $this->getMockBuilder(Order::class)
             ->addMethods(['addAddresses', 'setAddresses'])
             ->onlyMethods(
@@ -1177,10 +1137,9 @@ class QuoteManagementTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws NoSuchEntityException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function testGetCartForCustomer(): void
+    public function testGetCartForCustomer()
     {
         $customerId = 100;
         $cartMock = $this->createMock(Quote::class);
@@ -1227,10 +1186,9 @@ class QuoteManagementTest extends TestCase
     /**
      * Test submit for customer
      *
-     * @return void
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function testSubmitForCustomer(): void
+    public function testSubmitForCustomer()
     {
         $orderData = [];
         $isGuest = false;
@@ -1272,25 +1230,26 @@ class QuoteManagementTest extends TestCase
             ->method('convert')
             ->with($shippingAddress, $orderData)
             ->willReturn($baseOrder);
-        $this->quoteAddressToOrderAddress
+        $this->quoteAddressToOrderAddress->expects($this->at(0))
             ->method('convert')
-            ->withConsecutive(
+            ->with(
+                $shippingAddress,
                 [
-                    $shippingAddress,
-                    [
-                        'address_type' => 'shipping',
-                        'email' => 'customer@example.com'
-                    ]
-                ],
-                [
-                    $billingAddress,
-                    [
-                        'address_type' => 'billing',
-                        'email' => 'customer@example.com'
-                    ]
+                    'address_type' => 'shipping',
+                    'email' => 'customer@example.com'
                 ]
             )
-            ->willReturnOnConsecutiveCalls($convertedShipping, $convertedBilling);
+            ->willReturn($convertedShipping);
+        $this->quoteAddressToOrderAddress->expects($this->at(1))
+            ->method('convert')
+            ->with(
+                $billingAddress,
+                [
+                    'address_type' => 'billing',
+                    'email' => 'customer@example.com'
+                ]
+            )
+            ->willReturn($convertedBilling);
         $this->quoteItemToOrderItem->expects($this->once())->method('convert')
             ->with($quoteItem, ['parent_item' => null])
             ->willReturn($convertedQuoteItem);
@@ -1321,18 +1280,12 @@ class QuoteManagementTest extends TestCase
             ->method('place')
             ->with($order)
             ->willReturn($order);
-        $this->eventManager
+        $this->eventManager->expects($this->at(0))
             ->method('dispatch')
-            ->withConsecutive(
-                [
-                    'sales_model_service_quote_submit_before',
-                    ['order' => $order, 'quote' => $quote]
-                ],
-                [
-                    'sales_model_service_quote_submit_success',
-                    ['order' => $order, 'quote' => $quote]
-                ]
-            );
+            ->with('sales_model_service_quote_submit_before', ['order' => $order, 'quote' => $quote]);
+        $this->eventManager->expects($this->at(1))
+            ->method('dispatch')
+            ->with('sales_model_service_quote_submit_success', ['order' => $order, 'quote' => $quote]);
         $this->quoteRepositoryMock->expects($this->once())->method('save')->with($quote);
         $this->assertEquals($order, $this->model->submit($quote, $orderData));
     }
@@ -1345,7 +1298,7 @@ class QuoteManagementTest extends TestCase
      *
      * @return MockObject
      */
-    private function createPartialMockForAbstractClass(string $className, array $methods = []): MockObject
+    private function createPartialMockForAbstractClass($className, $methods = [])
     {
         return $this->getMockForAbstractClass(
             $className,

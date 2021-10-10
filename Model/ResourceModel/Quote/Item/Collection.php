@@ -64,11 +64,6 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\VersionContro
     private $recollectQuote = false;
 
     /**
-     * @var \Magento\Quote\Model\Config
-     */
-    private $config;
-
-    /**
      * @param \Magento\Framework\Data\Collection\EntityFactory $entityFactory
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy
@@ -80,7 +75,6 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\VersionContro
      * @param \Magento\Framework\DB\Adapter\AdapterInterface $connection
      * @param \Magento\Framework\Model\ResourceModel\Db\AbstractDb $resource
      * @param \Magento\Store\Model\StoreManagerInterface|null $storeManager
-     * @param \Magento\Quote\Model\Config|null $config
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -94,8 +88,7 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\VersionContro
         \Magento\Quote\Model\Quote\Config $quoteConfig,
         \Magento\Framework\DB\Adapter\AdapterInterface $connection = null,
         \Magento\Framework\Model\ResourceModel\Db\AbstractDb $resource = null,
-        \Magento\Store\Model\StoreManagerInterface $storeManager = null,
-        \Magento\Quote\Model\Config $config = null
+        \Magento\Store\Model\StoreManagerInterface $storeManager = null
     ) {
         parent::__construct(
             $entityFactory,
@@ -109,8 +102,6 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\VersionContro
         $this->_itemOptionCollectionFactory = $itemOptionCollectionFactory;
         $this->_productCollectionFactory = $productCollectionFactory;
         $this->_quoteConfig = $quoteConfig;
-        $this->config = $config ?:
-            \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Quote\Model\Config::class);
 
         // Backward compatibility constructor parameters
         $this->storeManager = $storeManager ?:
@@ -291,10 +282,7 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\VersionContro
             }
             if (!$item->isDeleted()) {
                 $item->setQtyOptions($qtyOptions)->setProduct($product);
-                if ($this->config->isEnabled()) {
-                    $item->checkData();
-                }
-
+                $item->checkData();
             }
         }
         if ($this->recollectQuote && $this->_quote) {

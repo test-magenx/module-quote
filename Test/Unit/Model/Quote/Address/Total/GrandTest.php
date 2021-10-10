@@ -38,31 +38,27 @@ class GrandTest extends TestCase
     {
         $this->priceRounder = $this->getMockBuilder(PriceRounder::class)
             ->disableOriginalConstructor()
-            ->addMethods(['roundPrice'])
+            ->setMethods(['roundPrice'])
             ->getMockForAbstractClass();
 
         $helper = new ObjectManager($this);
         $this->model = $helper->getObject(
             Grand::class,
             [
-                'priceRounder' => $this->priceRounder
+                'priceRounder' => $this->priceRounder,
             ]
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testCollect(): void
+    public function testCollect()
     {
         $totals = [1, 2, 3.4];
         $totalsBase = [4, 5, 6.7];
         $grandTotal = 6.4; // 1 + 2 + 3.4
         $grandTotalBase = 15.7; // 4 + 5 + 6.7
 
-        $this->priceRounder
-            ->method('roundPrice')
-            ->willReturnOnConsecutiveCalls($grandTotal + 2, $grandTotalBase + 2);
+        $this->priceRounder->expects($this->at(0))->method('roundPrice')->willReturn($grandTotal + 2);
+        $this->priceRounder->expects($this->at(1))->method('roundPrice')->willReturn($grandTotalBase + 2);
 
         $totalMock = $this->getMockBuilder(Total::class)
             ->addMethods(['setGrandTotal', 'setBaseGrandTotal', 'getGrandTotal', 'getBaseGrandTotal'])
