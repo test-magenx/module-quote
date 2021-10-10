@@ -46,7 +46,7 @@ class GuestBillingAddressManagement implements GuestBillingAddressManagementInte
     {
         /** @var $quoteIdMask QuoteIdMask */
         $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        return (int)$this->billingAddressManagement->assign($quoteIdMask->getQuoteId(), $address, $useForShipping);
+        return $this->billingAddressManagement->assign($quoteIdMask->getQuoteId(), $address, $useForShipping);
     }
 
     /**

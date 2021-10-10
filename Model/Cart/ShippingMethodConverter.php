@@ -24,11 +24,6 @@ class ShippingMethodConverter
     protected $taxHelper;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
      * Constructs a shipping method converter object.
      *
      * @param \Magento\Quote\Api\Data\ShippingMethodInterfaceFactory $shippingMethodDataFactory Shipping method factory.

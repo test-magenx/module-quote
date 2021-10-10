@@ -97,8 +97,6 @@ class GuestBillingAddressManagementTest extends TestCase
     {
         $addressId = 1;
         $this->billingAddressManagementMock->expects($this->once())->method('assign')->willReturn($addressId);
-        $actualAddressId = $this->model->assign($this->maskedCartId, $this->addressMock);
-        $this->assertIsInt($actualAddressId);
-        $this->assertEquals($addressId, $actualAddressId);
+        $this->assertEquals($addressId, $this->model->assign($this->maskedCartId, $this->addressMock));
     }
 }

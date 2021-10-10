@@ -5,9 +5,7 @@
  */
 namespace Magento\Quote\Model\ResourceModel\Quote;
 
-use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\VersionControl\AbstractDb;
-use Magento\Quote\Model\Quote\Item\Option;
 
 /**
  * Quote resource model
@@ -29,37 +27,17 @@ class Item extends AbstractDb
     /**
      * {@inheritdoc}
      */
-    public function save(AbstractModel $object)
+    public function save(\Magento\Framework\Model\AbstractModel $object)
     {
         $hasDataChanges = $this->isModified($object);
         $object->setIsOptionsSaved(false);
 
         $result = parent::save($object);
 
-        if (!$object->isOptionsSaved() && ($hasDataChanges || $this->hasOptionsChanged($object))) {
+        if ($hasDataChanges && !$object->isOptionsSaved()) {
             $object->saveItemOptions();
         }
         return $result;
-    }
-
-    /**
-     * Check if quote item options have changed.
-     *
-     * @param AbstractModel $object
-     * @return bool
-     */
-    private function hasOptionsChanged(AbstractModel $object): bool
-    {
-        $hasDataChanges = false;
-        $options = $object->getOptions() ?? [];
-        foreach ($options as $option) {
-            /** @var Option $option */
-            if (!$option->getId() || $option->getResource()->hasDataChanged($option)) {
-                $hasDataChanges = true;
-                break;
-            }
-        }
-        return $hasDataChanges;
     }
 
     /**
